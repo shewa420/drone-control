@@ -1,10 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <title>Адмін-панель</title>
 </head>
 <body>
+  <h1>Користувачі системи</h1>
+  <ul id="userList"></ul>
 
+  <script>
+    async function loadUsers() {
+      const res = await fetch("/admin/users");
+      const users = await res.json();
+
+      const list = document.getElementById("userList");
+      list.innerHTML = "";
+
+      users.forEach(user => {
+        const li = document.createElement("li");
+        li.textContent = `${user.username} – ${user.is_approved ? "✅ підтверджений" : "❌ очікує"}`;
+
+        if (!user.is_approved) {
+          const btn = document.createElement("button");
+          btn.textContent = "Підтвердити";
+          btn.onclick = async () => {
+            await fetch(`/admin/approve/${user.id}`, { method: "POST" });
+            loadUsers();
+          };
+          li.appendChild(btn);
+        }
+
+        list.appendChild(li);
+      });
+    }
+
+    loadUsers();
+  </script>
 </body>
 </html>
