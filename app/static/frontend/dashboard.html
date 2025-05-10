@@ -2,11 +2,65 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Керування дроном: TX12 + клавіатура</title>
+  <title>Керування дроном</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #fff;
+      color: #111;
+    }
+
+    header {
+      background-color: #d40000;
+      color: white;
+      padding: 15px 20px;
+      font-size: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .gamepad-status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .stick-values {
+      font-size: 16px;
+      margin-top: 10px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
-  <h1>Керування дроном</h1>
-  <p id="status">Очікування джойстика або клавіатури...</p>
+  <header>
+    <div>🛸 Drone Control</div>
+    <nav>
+      <a href="index.html">Вхід</a>
+      <a href="dashboard.html">Панель</a>
+      <a href="admin.html">Адмін</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>Керування дроном</h1>
+    <p id="status">Очікування джойстика або клавіатури...</p>
+    <div class="stick-values" id="sticks">X: 0.00 | Y: 0.00</div>
+  </div>
 
   <script>
     let sent = {};
@@ -33,7 +87,6 @@
     // 🎮 Gamepad
     window.addEventListener("gamepadconnected", () => {
       document.getElementById("status").textContent = "🎮 Джойстик підключено!";
-      console.log("🎮 Gamepad connected:", navigator.getGamepads()[0]);
       pollGamepad();
     });
 
@@ -43,6 +96,8 @@
 
       const [lx, ly] = [gp.axes[0], gp.axes[1]];
       const btns = gp.buttons;
+
+      document.getElementById("sticks").textContent = `X: ${lx.toFixed(2)} | Y: ${ly.toFixed(2)}`;
 
       btns.forEach((btn, i) => {
         if (btn.pressed) {
@@ -63,7 +118,7 @@
       requestAnimationFrame(pollGamepad);
     }
 
-    // ⌨️ Keyboard fallback
+    // ⌨️ Клавіатура
     document.addEventListener("keydown", (e) => {
       console.log(`⌨️ Key pressed: ${e.key}`);
       switch (e.key.toLowerCase()) {
