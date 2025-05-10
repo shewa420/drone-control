@@ -8,9 +8,9 @@ models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
-# Підключаємо API
+# API
 app.include_router(auth_router)
 app.include_router(admin_router)
 
-# Статичні HTML файли
+# Підключаємо фронтенд
 app.mount("/", StaticFiles(directory="app/static/frontend", html=True), name="static")
