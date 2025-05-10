@@ -1,185 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Керування дроном</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #fff;
-      color: #111;
-    }
-
-    header {
-      background-color: #d40000;
-      color: white;
-      padding: 15px 20px;
-      font-size: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 20px;
-    }
-
-    .container {
-      padding: 20px;
-    }
-
-    .gamepad-status {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-
-    .stick-visual {
-      display: flex;
-      gap: 40px;
-      margin-top: 20px;
-    }
-
-    .stick {
-      width: 100px;
-      height: 100px;
-      background: #f1f1f1;
-      border: 2px solid #ccc;
-      border-radius: 12px;
-      position: relative;
-    }
-
-    .dot {
-      width: 20px;
-      height: 20px;
-      background: #d40000;
-      border-radius: 50%;
-      position: absolute;
-      top: 40px;
-      left: 40px;
-      transition: all 0.1s linear;
-    }
-
-    .label {
-      text-align: center;
-      margin-top: 5px;
-      font-size: 14px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управління дроном</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header>
-    <div>🛸 Drone Control</div>
-    <nav>
-      <a href="index.html">Вхід</a>
-      <a href="dashboard.html">Панель</a>
-      <a href="admin.html">Адмін</a>
-    </nav>
-  </header>
-
-  <div class="container">
-    <h1>Керування дроном</h1>
-    <p id="status">Очікування джойстика або клавіатури...</p>
-
-    <div class="stick-visual">
-      <div>
-        <div class="stick" id="stick-left">
-          <div class="dot" id="dot-left"></div>
-        </div>
-        <div class="label">CH3 (THR) + CH4 (RUD)</div>
-      </div>
-      <div>
-        <div class="stick" id="stick-right">
-          <div class="dot" id="dot-right"></div>
-        </div>
-        <div class="label">CH1 (AIL) + CH2 (ELE)</div>
-      </div>
+    <div class="navbar">
+        <a href="/dashboard.html">Панель</a>
+        <a href="/admin.html">Адмінка</a>
+        <a href="/index.html">Вихід</a>
     </div>
-  </div>
 
-  <script>
-    let sent = {};
+    <h1>Управління дроном</h1>
 
-    async function sendCommand(command) {
-      if (sent[command]) return;
-      sent[command] = true;
+    <div class="stick-container">
+        <div class="stick">
+            <h3>CH1 (Aileron)</h3>
+            <div class="bar" id="ch1-bar"></div>
+        </div>
+        <div class="stick">
+            <h3>CH2 (Elevator)</h3>
+            <div class="bar" id="ch2-bar"></div>
+        </div>
+        <div class="stick">
+            <h3>CH4 (Rudder)</h3>
+            <div class="bar" id="ch4-bar"></div>
+        </div>
+        <div class="stick">
+            <h3>CH3 (Throttle)</h3>
+            <div class="bar" id="ch3-bar"></div>
+        </div>
+    </div>
 
-      try {
-        const res = await fetch('/api/drone/command', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ command })
+    <table class="channels-table">
+        <tr>
+            <th>CH5</th>
+            <th>CH6</th>
+            <th>CH7</th>
+            <th>CH8</th>
+        </tr>
+        <tr>
+            <td id="ch5-val">0%</td>
+            <td id="ch6-val">0%</td>
+            <td id="ch7-val">0%</td>
+            <td id="ch8-val">0%</td>
+        </tr>
+    </table>
+
+    <script>
+        window.addEventListener("gamepadconnected", () => {
+            const interval = setInterval(() => {
+                const gamepad = navigator.getGamepads()[0];
+                if (!gamepad) return;
+
+                const axes = gamepad.axes;
+
+                // CH1 (Aileron)
+                document.getElementById("ch1-bar").style.width = ((axes[0] + 1) / 2 * 100).toFixed(0) + "%";
+
+                // CH2 (Elevator)
+                document.getElementById("ch2-bar").style.width = ((-axes[1] + 1) / 2 * 100).toFixed(0) + "%";
+
+                // CH4 (Rudder) — инвертирован
+                document.getElementById("ch4-bar").style.width = ((-axes[2] + 1) / 2 * 100).toFixed(0) + "%";
+
+                // CH3 (Throttle)
+                document.getElementById("ch3-bar").style.width = ((axes[3] + 1) / 2 * 100).toFixed(0) + "%";
+
+                // CH5 - CH8 текстовый вывод
+                for (let i = 4; i <= 7; i++) {
+                    let val = ((gamepad.axes[i] + 1) / 2 * 100).toFixed(0) + "%";
+                    document.getElementById(`ch${i + 1}-val`).innerText = val;
+                }
+
+            }, 100);
         });
-        const data = await res.json();
-        console.log(`✅ ${command}:`, data.message || data.detail || "OK");
-      } catch (err) {
-        console.error(`❌ ${command}:`, err);
-      }
-
-      setTimeout(() => { sent[command] = false }, 300);
-    }
-
-    window.addEventListener("gamepadconnected", () => {
-      document.getElementById("status").textContent = "🎮 Джойстик підключено!";
-      console.log("🎮 Gamepad connected:", navigator.getGamepads()[0]);
-      pollGamepad();
-    });
-
-    function pollGamepad() {
-      const gp = navigator.getGamepads()[0];
-      if (!gp) return requestAnimationFrame(pollGamepad);
-
-      const [ali, ele, rud, thr] = [
-        gp.axes[0] || 0,           // CH1 - Roll (AIL)
-        -gp.axes[1] || 0,          // CH2 - Pitch (ELE), інвертований
-        gp.axes[2] || 0,           // CH4 - Yaw (RUD)
-        -gp.axes[3] || 0           // CH3 - Throttle (THR), інвертований
-      ];
-
-      const dotL = document.getElementById("dot-left");
-      const dotR = document.getElementById("dot-right");
-
-      dotL.style.left = `${40 + rud * 30}px`;
-      dotL.style.top = `${40 + thr * 30}px`;
-
-      dotR.style.left = `${40 + ali * 30}px`;
-      dotR.style.top = `${40 + ele * 30}px`;
-
-      const btns = gp.buttons;
-      btns.forEach((btn, i) => {
-        if (btn.pressed) {
-          console.log(`🎮 Button ${i} pressed`);
-        }
-      });
-
-      if (btns[0]?.pressed) sendCommand("ARM");
-      if (btns[1]?.pressed) sendCommand("DISARM");
-      if (btns[2]?.pressed) sendCommand("TAKEOFF");
-      if (btns[3]?.pressed) sendCommand("LAND");
-
-      if (ele > 0.5) sendCommand("FORWARD");
-      if (ele < -0.5) sendCommand("BACKWARD");
-      if (ali < -0.5) sendCommand("LEFT");
-      if (ali > 0.5) sendCommand("RIGHT");
-
-      requestAnimationFrame(pollGamepad);
-    }
-
-    document.addEventListener("keydown", (e) => {
-      console.log(`⌨️ Key pressed: ${e.key}`);
-      switch (e.key.toLowerCase()) {
-        case "w": sendCommand("FORWARD"); break;
-        case "s": sendCommand("BACKWARD"); break;
-        case "a": sendCommand("LEFT"); break;
-        case "d": sendCommand("RIGHT"); break;
-        case " ": sendCommand("TAKEOFF"); break;
-        case "l": sendCommand("LAND"); break;
-        case "e": sendCommand("ARM"); break;
-        case "q": sendCommand("DISARM"); break;
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
