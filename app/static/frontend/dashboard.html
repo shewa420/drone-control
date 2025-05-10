@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <title>Панель керування дроном</title>
 </head>
 <body>
+  <h1>Панель керування</h1>
 
+  <button onclick="sendCommand('ARM')">ARM</button>
+  <button onclick="sendCommand('DISARM')">DISARM</button>
+  <button onclick="sendCommand('TAKEOFF')">Зліт</button>
+  <button onclick="sendCommand('LAND')">Посадка</button>
+
+  <p id="status"></p>
+
+  <script>
+    async function sendCommand(command) {
+      const res = await fetch('/api/drone/command', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ command })
+      });
+
+      const data = await res.json();
+      document.getElementById("status").innerText = res.ok
+        ? `✅ Команда "${command}" відправлена успішно.`
+        : `❌ Помилка: ${data.detail}`;
+    }
+  </script>
 </body>
 </html>
