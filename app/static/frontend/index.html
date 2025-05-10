@@ -2,10 +2,59 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Drone Control</title>
+  <title>Вхід у систему дрона</title>
 </head>
 <body>
-  <h1>🚁 Сайт управления дроном работает!</h1>
-  <p>Если ты это видишь — значит FastAPI отдает HTML корректно.</p>
+  <h2>Вхід</h2>
+  <form id="loginForm">
+    <input type="text" id="loginUser" placeholder="Username" required>
+    <input type="password" id="loginPass" placeholder="Password" required>
+    <button type="submit">Увійти</button>
+  </form>
+
+  <h2>Реєстрація</h2>
+  <form id="registerForm">
+    <input type="text" id="registerUser" placeholder="Username" required>
+    <input type="password" id="registerPass" placeholder="Password" required>
+    <button type="submit">Зареєструватися</button>
+  </form>
+
+  <script>
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: document.getElementById('loginUser').value,
+          password: document.getElementById('loginPass').value
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.is_admin) {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      } else {
+        alert(data.detail || "Помилка входу");
+      }
+    };
+
+    document.getElementById('registerForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: document.getElementById('registerUser').value,
+          password: document.getElementById('registerPass').value
+        })
+      });
+      const data = await res.json();
+      alert(res.ok ? "Реєстрація успішна! Очікуйте підтвердження." : data.detail);
+    };
+  </script>
 </body>
 </html>
