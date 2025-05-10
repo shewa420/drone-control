@@ -25,12 +25,12 @@
             <div class="bar" id="ch2-bar"></div>
         </div>
         <div class="stick">
-            <h3>CH4 (Rudder)</h3>
-            <div class="bar" id="ch4-bar"></div>
-        </div>
-        <div class="stick">
             <h3>CH3 (Throttle)</h3>
             <div class="bar" id="ch3-bar"></div>
+        </div>
+        <div class="stick">
+            <h3>CH4 (Rudder)</h3>
+            <div class="bar" id="ch4-bar"></div>
         </div>
     </div>
 
@@ -51,6 +51,7 @@
 
     <script>
         window.addEventListener("gamepadconnected", () => {
+            document.getElementById("status")?.remove();
             const interval = setInterval(() => {
                 const gamepad = navigator.getGamepads()[0];
                 if (!gamepad) return;
@@ -63,11 +64,11 @@
                 // CH2 (Elevator)
                 document.getElementById("ch2-bar").style.width = ((-axes[1] + 1) / 2 * 100).toFixed(0) + "%";
 
-                // CH4 (Rudder) — инвертирован
-                document.getElementById("ch4-bar").style.width = ((-axes[2] + 1) / 2 * 100).toFixed(0) + "%";
-
                 // CH3 (Throttle)
-                document.getElementById("ch3-bar").style.width = ((axes[3] + 1) / 2 * 100).toFixed(0) + "%";
+                document.getElementById("ch3-bar").style.width = ((axes[2] + 1) / 2 * 100).toFixed(0) + "%";
+
+                // CH4 (Rudder) — инвертирован
+                document.getElementById("ch4-bar").style.width = ((-axes[3] + 1) / 2 * 100).toFixed(0) + "%";
 
                 // CH5 - CH8 текстовый вывод
                 for (let i = 4; i <= 7; i++) {
@@ -76,6 +77,20 @@
                 }
 
             }, 100);
+        });
+
+        document.addEventListener("keydown", (e) => {
+            console.log(`⌨️ Key pressed: ${e.key}`);
+            switch (e.key.toLowerCase()) {
+                case "w": console.log("Move FORWARD"); break;
+                case "s": console.log("Move BACKWARD"); break;
+                case "a": console.log("Move LEFT"); break;
+                case "d": console.log("Move RIGHT"); break;
+                case " ": console.log("TAKEOFF"); break;
+                case "l": console.log("LAND"); break;
+                case "e": console.log("ARM"); break;
+                case "q": console.log("DISARM"); break;
+            }
         });
     </script>
 </body>
