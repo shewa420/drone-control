@@ -3,10 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <title>Адмін-панель</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #fff;
+      color: #111;
+    }
+
+    header {
+      background-color: #d40000;
+      color: white;
+      padding: 15px 20px;
+      font-size: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+
+    .container {
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-left: 10px;
+      background-color: #d40000;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #b00000;
+    }
+  </style>
 </head>
 <body>
-  <h1>Користувачі системи</h1>
-  <ul id="userList"></ul>
+  <header>
+    <div>🛸 Drone Control</div>
+    <nav>
+      <a href="index.html">Вхід</a>
+      <a href="dashboard.html">Панель</a>
+      <a href="admin.html">Адмін</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h1>Користувачі системи</h1>
+    <ul id="userList"></ul>
+  </div>
 
   <script>
     async function loadUsers() {
