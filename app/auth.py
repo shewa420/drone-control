@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -8,11 +8,11 @@ import hashlib
 router = APIRouter()
 
 
-@router.post("/auth/login")
+@router.post("/auth/login", response_model=None)
 async def login(
     username: str = Form(...),
     password: str = Form(...),
-    db: Session = get_db()
+    db: Session = Depends(get_db)  # ✅ Замість get_db()
 ):
     hashed = hashlib.sha256(password.encode()).hexdigest()
     user = db.query(User).filter_by(username=username, password=hashed).first()
@@ -29,11 +29,11 @@ async def login(
         return RedirectResponse("/dashboard.html", status_code=303)
 
 
-@router.post("/auth/register")
+@router.post("/auth/register", response_model=None)
 async def register(
     username: str = Form(...),
     password: str = Form(...),
-    db: Session = get_db()
+    db: Session = Depends(get_db)  # ✅
 ):
     existing = db.query(User).filter_by(username=username).first()
     if existing:
