@@ -1,44 +1,52 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from . import models, schemas, database
+from ..database import get_db
+from ..models import User
 import hashlib
 
 router = APIRouter()
 
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@router.post("/register", response_model=schemas.UserOut)
-def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(models.User).filter(models.User.username == user.username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username already exists")
+@router.post("/auth/login")
+async def login(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = get_db()
+):
+    hashed = hashlib.sha256(password.encode()).hexdigest()
+    user = db.query(User).filter_by(username=username, password=hashed).first()
 
-    hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
-    new_user = models.User(
-        username=user.username,
-        password=hashed_password,
-        is_admin=False,
-        is_approved=False
+    if not user:
+        return HTMLResponse("<h1>Невірний логін або пароль</h1>", status_code=401)
+
+    if not user.is_approved:
+        return HTMLResponse("<h1>Обліковий запис ще не підтверджено</h1>", status_code=403)
+
+    if user.is_admin:
+        return RedirectResponse("/admin.html", status_code=303)
+    else:
+        return RedirectResponse("/dashboard.html", status_code=303)
+
+
+@router.post("/auth/register")
+async def register(
+    username: str = Form(...),
+    password: str = Form(...),
+    db: Session = get_db()
+):
+    existing = db.query(User).filter_by(username=username).first()
+    if existing:
+        return HTMLResponse("<h1>Користувач уже існує</h1>", status_code=400)
+
+    hashed = hashlib.sha256(password.encode()).hexdigest()
+    new_user = User(
+        username=username,
+        password=hashed,
+        is_approved=False,
+        is_admin=False
     )
     db.add(new_user)
     db.commit()
-    db.refresh(new_user)
-    return new_user
 
-@router.post("/login")
-def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
-    db_user = db.query(models.User).filter(
-        models.User.username == user.username,
-        models.User.password == hashed_password
-    ).first()
-    if not db_user:
-        raise HTTPException(status_code=400, detail="Invalid credentials")
-    if not db_user.is_approved:
-        raise HTTPException(status_code=403, detail="User not approved")
-    return {"message": "Login successful", "user_id": db_user.id, "is_admin": db_user.is_admin}
+    return HTMLResponse("<h1>Реєстрація успішна. Зачекайте підтвердження від адміністратора.</h1>")
