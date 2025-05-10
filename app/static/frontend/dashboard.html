@@ -66,7 +66,7 @@
 
     .bar-container {
       margin-top: 30px;
-      max-width: 400px;
+      max-width: 500px;
     }
 
     .bar {
@@ -78,6 +78,14 @@
     .bar-label {
       width: 60px;
       font-size: 13px;
+    }
+
+    .bar-aux-label {
+      width: 100px;
+      font-size: 13px;
+      text-align: left;
+      margin-left: 10px;
+      color: #555;
     }
 
     .bar-track {
@@ -130,10 +138,26 @@
     </div>
 
     <div class="bar-container">
-      <div class="bar"><div class="bar-label">CH5</div><div class="bar-track"><div id="bar-ch5" class="bar-fill color-ch5" style="width: 50%"></div></div></div>
-      <div class="bar"><div class="bar-label">CH6</div><div class="bar-track"><div id="bar-ch6" class="bar-fill color-ch6" style="width: 50%"></div></div></div>
-      <div class="bar"><div class="bar-label">CH7</div><div class="bar-track"><div id="bar-ch7" class="bar-fill color-ch7" style="width: 50%"></div></div></div>
-      <div class="bar"><div class="bar-label">CH8</div><div class="bar-track"><div id="bar-ch8" class="bar-fill color-ch8" style="width: 50%"></div></div></div>
+      <div class="bar">
+        <div class="bar-label">CH5</div>
+        <div class="bar-track"><div id="bar-ch5" class="bar-fill color-ch5" style="width: 0%"></div></div>
+        <div class="bar-aux-label">ARM</div>
+      </div>
+      <div class="bar">
+        <div class="bar-label">CH6</div>
+        <div class="bar-track"><div id="bar-ch6" class="bar-fill color-ch6" style="width: 0%"></div></div>
+        <div class="bar-aux-label">FLIGHT MODE</div>
+      </div>
+      <div class="bar">
+        <div class="bar-label">CH7</div>
+        <div class="bar-track"><div id="bar-ch7" class="bar-fill color-ch7" style="width: 0%"></div></div>
+        <div class="bar-aux-label">BEEPER</div>
+      </div>
+      <div class="bar">
+        <div class="bar-label">CH8</div>
+        <div class="bar-track"><div id="bar-ch8" class="bar-fill color-ch8" style="width: 0%"></div></div>
+        <div class="bar-aux-label">CUSTOM</div>
+      </div>
     </div>
   </div>
 
