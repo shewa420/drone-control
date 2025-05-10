@@ -3,6 +3,9 @@ from fastapi.staticfiles import StaticFiles
 from . import models, database
 from .auth import router as auth_router
 from .admin import router as admin_router
+from .routers import drone
+
+app.include_router(drone.router)
 
 models.Base.metadata.create_all(bind=database.engine)
 
