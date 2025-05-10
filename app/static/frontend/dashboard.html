@@ -32,11 +32,6 @@
       padding: 20px;
     }
 
-    .gamepad-status {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-
     .stick-visual {
       display: flex;
       gap: 40px;
@@ -68,6 +63,41 @@
       margin-top: 5px;
       font-size: 14px;
     }
+
+    .bar-container {
+      margin-top: 30px;
+      max-width: 400px;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .bar-label {
+      width: 60px;
+      font-size: 13px;
+    }
+
+    .bar-track {
+      flex-grow: 1;
+      height: 14px;
+      background: #eee;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-left: 10px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      transition: width 0.1s ease;
+    }
+
+    .color-ch5 { background-color: red; }
+    .color-ch6 { background-color: brown; }
+    .color-ch7 { background-color: gray; }
+    .color-ch8 { background-color: magenta; }
   </style>
 </head>
 <body>
@@ -97,6 +127,13 @@
         </div>
         <div class="label">CH1 (AIL) + CH2 (ELE)</div>
       </div>
+    </div>
+
+    <div class="bar-container">
+      <div class="bar"><div class="bar-label">CH5</div><div class="bar-track"><div id="bar-ch5" class="bar-fill color-ch5" style="width: 50%"></div></div></div>
+      <div class="bar"><div class="bar-label">CH6</div><div class="bar-track"><div id="bar-ch6" class="bar-fill color-ch6" style="width: 50%"></div></div></div>
+      <div class="bar"><div class="bar-label">CH7</div><div class="bar-track"><div id="bar-ch7" class="bar-fill color-ch7" style="width: 50%"></div></div></div>
+      <div class="bar"><div class="bar-label">CH8</div><div class="bar-track"><div id="bar-ch8" class="bar-fill color-ch8" style="width: 50%"></div></div></div>
     </div>
   </div>
 

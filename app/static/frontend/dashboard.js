@@ -31,21 +31,32 @@ function pollGamepad() {
   if (!gp) return requestAnimationFrame(pollGamepad);
 
   const [ali, ele, rud, thr] = [
-    gp.axes[0] || 0,           // CH1 - Roll (AIL)
-    -gp.axes[1] || 0,          // CH2 - Pitch (ELE), інвертований
-    gp.axes[2] || 0,           // CH4 - Yaw (RUD)
-    -gp.axes[3] || 0           // CH3 - Throttle (THR), інвертований
+    -gp.axes[0] || 0,         // CH1 - Roll (AIL), инвертирован
+    gp.axes[1] || 0,          // CH2 - Pitch (ELE)
+    -gp.axes[2] || 0,         // CH4 - Yaw (RUD), инвертирован
+    gp.axes[3] || 0           // CH3 - Throttle (THR)
   ];
 
   const dotL = document.getElementById("dot-left");
   const dotR = document.getElementById("dot-right");
 
-  // 🛠️ Заменили местами RUD и THR (ось X теперь THR, ось Y — RUD)
+  // Отображение стиков
   dotL.style.left = `${40 + thr * 30}px`;
   dotL.style.top = `${40 + rud * 30}px`;
-
   dotR.style.left = `${40 + ali * 30}px`;
   dotR.style.top = `${40 + ele * 30}px`;
+
+  // CH5–CH8
+  const ch5 = gp.buttons[4]?.value ?? 0;
+  const ch6 = gp.buttons[5]?.value ?? 0;
+  const ch7 = gp.buttons[6]?.value ?? 0;
+  const ch8 = gp.buttons[7]?.value ?? 0;
+
+  // Обновление шкал
+  document.getElementById("bar-ch5").style.width = `${ch5 * 100}%`;
+  document.getElementById("bar-ch6").style.width = `${ch6 * 100}%`;
+  document.getElementById("bar-ch7").style.width = `${ch7 * 100}%`;
+  document.getElementById("bar-ch8").style.width = `${ch8 * 100}%`;
 
   const btns = gp.buttons;
   btns.forEach((btn, i) => {
