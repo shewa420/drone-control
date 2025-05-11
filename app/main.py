@@ -4,12 +4,11 @@ from fastapi.staticfiles import StaticFiles
 from . import models, database
 from .auth import router as auth_router
 from .admin import router as admin_router
-from .routers import drone, ws  # всё сразу
-from app.routers import drone, ws
+from .routers import drone, ws
 
 models.Base.metadata.create_all(bind=database.engine)
 
-app = FastAPI()  # ✅ создаём app ПЕРЕД роутерами
+app = FastAPI()
 
 from .database import SessionLocal
 import hashlib
@@ -33,11 +32,11 @@ def create_admin_if_not_exists():
 
 create_admin_if_not_exists()
 
-# ✅ теперь подключаем роутеры ПОСЛЕ app = FastAPI()
+# Подключаем роутеры
 app.include_router(ws.router)
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(drone.router)
 
-# фронтенд
+# Подключаем фронтенд
 app.mount("/", StaticFiles(directory="app/static/frontend", html=True), name="static")
