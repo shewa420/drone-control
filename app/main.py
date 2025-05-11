@@ -5,6 +5,7 @@ from . import models, database
 from .auth import router as auth_router
 from .admin import router as admin_router
 from .routers import drone, ws  # всё сразу
+from app.routers import drone, ws
 
 models.Base.metadata.create_all(bind=database.engine)
 
