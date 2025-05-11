@@ -3,33 +3,25 @@ let currentRC = new Array(8).fill(1500);
 let lastSentRC = new Array(8).fill(1500);
 
 function connectSocket() {
-  console.log("📡 WebSocket RC client loaded");
-
   socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
 
-  socket.onopen = () => {
-    console.log("✅ Connected to server via /ws/client");
-  };
-
-  socket.onerror = (error) => {
-    console.error("❌ WebSocket error:", error);
-  };
-
+  socket.onopen = () => console.log("✅ WS connected");
+  socket.onerror = (e) => console.error("❌ WS error:", e);
   socket.onclose = () => {
-    console.warn("🔌 WebSocket closed");
+    console.warn("🔌 WS closed");
     setTimeout(connectSocket, 2000);
   };
 }
 
 connectSocket();
 
-function scale(value) {
-  return Math.round(((value + 1) / 2) * 1000 + 1000);
+function scale(v) {
+  return Math.round(((v + 1) / 2) * 1000 + 1000);
 }
 
 window.addEventListener("gamepadconnected", () => {
   document.getElementById("status").textContent = "🎮 Джойстик підключено!";
-  console.log("🎮 Gamepad connected:", navigator.getGamepads()[0]);
+  console.log("🎮 Gamepad connected");
 
   setInterval(() => {
     const gp = navigator.getGamepads()[0];
@@ -53,7 +45,6 @@ window.addEventListener("gamepadconnected", () => {
 
     currentRC = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
 
-    // отправляем только если значения изменились
     if (JSON.stringify(currentRC) !== JSON.stringify(lastSentRC)) {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
@@ -64,7 +55,7 @@ window.addEventListener("gamepadconnected", () => {
       }
     }
 
-    // Обновление графики
+    // GUI
     document.getElementById("dot-left").style.left = `${40 + thr * 30}px`;
     document.getElementById("dot-left").style.top = `${40 + rud * 30}px`;
     document.getElementById("dot-right").style.left = `${40 + ail * 30}px`;
@@ -74,5 +65,5 @@ window.addEventListener("gamepadconnected", () => {
     document.getElementById("bar-ch6").style.width = `${ch6 / 20}%`;
     document.getElementById("bar-ch7").style.width = `${ch7 / 20}%`;
     document.getElementById("bar-ch8").style.width = `${ch8 / 20}%`;
-  }, 50); // 20 Гц
+  }, 100); // 10 Гц
 });
