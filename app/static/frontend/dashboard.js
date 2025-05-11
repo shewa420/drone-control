@@ -29,13 +29,13 @@ window.addEventListener("gamepadconnected", () => {
 
     const [ail, ele, thr, rud] = [
       gp.axes[0] || 0,
-      gp.axes[1] || 0,
+      -(gp.axes[1] || 0),        // ✅ ELE инвертирован
       gp.axes[3] || 0,
       -(gp.axes[2] || 0)
     ];
 
     const ch1 = scale(ail);
-    const ch2 = scale(ele);
+    const ch2 = scale(ele);  // ✅ теперь вверх = >1500
     const ch3 = scale(thr);
     const ch4 = scale(rud);
     const ch5 = gp.buttons[4]?.pressed ? 2000 : 1000;
@@ -55,7 +55,7 @@ window.addEventListener("gamepadconnected", () => {
       }
     }
 
-    // GUI
+    // GUI update
     document.getElementById("dot-left").style.left = `${40 + thr * 30}px`;
     document.getElementById("dot-left").style.top = `${40 + rud * 30}px`;
     document.getElementById("dot-right").style.left = `${40 + ail * 30}px`;
