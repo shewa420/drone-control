@@ -9,9 +9,7 @@ from app.routers import ws
 
 models.Base.metadata.create_all(bind=database.engine)
 
-app.include_router(ws.router)
-
-app = FastAPI()
+app = FastAPI()  # ✅ сначала создаём приложение
 
 from . import models
 from .database import SessionLocal
@@ -36,7 +34,8 @@ def create_admin_if_not_exists():
 
 create_admin_if_not_exists()
 
-# Роути API
+# Подключаем все роутеры ПОСЛЕ создания app
+app.include_router(ws.router)
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(drone.router)
