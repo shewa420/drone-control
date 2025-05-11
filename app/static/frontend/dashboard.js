@@ -1,15 +1,34 @@
 let socket = null;
 let currentRC = new Array(8).fill(1500);
 let lastSentRC = new Array(8).fill(1500);
-let lastSwitchState = [1000, 1000, 1000, 1000]; // ch5–ch8
+let lastSwitchState = [1000, 1000, 1000, 1000]; // CH5–CH8
 
 function connectSocket() {
   socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
 
-  socket.onopen = () => console.log("✅ WS connected");
-  socket.onerror = (e) => console.error("❌ WS error:", e);
+  socket.onopen = () => {
+    console.log("✅ WebSocket connected");
+
+    // heartbeat каждые 5 секунд
+    setInterval(() => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: "ping" }));
+      }
+    }, 5000);
+  };
+
+  socket.onmessage = (event) => {
+    if (event.data === "pong") {
+      console.log("🏓 pong received");
+    } else {
+      console.log("📩 From server:", event.data);
+    }
+  };
+
+  socket.onerror = (e) => console.error("❌ WebSocket error:", e);
+
   socket.onclose = () => {
-    console.warn("🔌 WS closed");
+    console.warn("🔌 WebSocket closed");
     setTimeout(connectSocket, 2000);
   };
 }
@@ -23,6 +42,13 @@ function scale(v) {
 window.addEventListener("gamepadconnected", () => {
   document.getElementById("status").textContent = "🎮 Джойстик підключено!";
   console.log("🎮 Gamepad connected");
+
+  // отладка буфера WebSocket
+  setInterval(() => {
+    if (socket) {
+      console.log("🔁 WS bufferedAmount:", socket.bufferedAmount);
+    }
+  }, 1000);
 
   setInterval(() => {
     const gp = navigator.getGamepads()[0];
@@ -50,7 +76,6 @@ window.addEventListener("gamepadconnected", () => {
 
     currentRC = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
 
-    // Отправка стиков только при изменении
     if (JSON.stringify(sticks) !== JSON.stringify(lastSentRC.slice(0, 4))) {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
@@ -61,7 +86,7 @@ window.addEventListener("gamepadconnected", () => {
       }
     }
 
-    // Отправка переключателей — только при изменении
+    // только если переключатели изменились
     switches.forEach((val, i) => {
       if (val !== lastSwitchState[i]) {
         currentRC[4 + i] = val;
@@ -85,5 +110,5 @@ window.addEventListener("gamepadconnected", () => {
     document.getElementById("bar-ch6").style.width = `${ch6 / 20}%`;
     document.getElementById("bar-ch7").style.width = `${ch7 / 20}%`;
     document.getElementById("bar-ch8").style.width = `${ch8 / 20}%`;
-  }, 100);
+  }, 100); // 10 Гц
 });
