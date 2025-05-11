@@ -5,8 +5,11 @@ from . import models, database
 from .auth import router as auth_router
 from .admin import router as admin_router
 from .routers import drone  # ✅ підключення роутера керування
+from app.routers import ws
 
 models.Base.metadata.create_all(bind=database.engine)
+
+app.include_router(ws.router)
 
 app = FastAPI()
 
