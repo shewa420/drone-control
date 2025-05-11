@@ -1,18 +1,48 @@
-
 let sent = {};
+let socket = null;
 
+// Подключение к WebSocket
+function connectSocket() {
+  console.log("📡 WebSocket dashboard.js loaded");
+
+  socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
+
+  socket.onopen = () => {
+    console.log("✅ Connected to server via /ws/client");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("📩 From server:", event.data);
+  };
+
+  socket.onerror = (error) => {
+    console.error("❌ WebSocket error:", error);
+  };
+
+  socket.onclose = () => {
+    console.warn("🔌 WebSocket closed");
+    // Повторное подключение через 2 секунды
+    setTimeout(connectSocket, 2000);
+  };
+}
+
+connectSocket();
+
+// Отправка команды через WebSocket
 async function sendCommand(command) {
   if (sent[command]) return;
   sent[command] = true;
 
   try {
-    const res = await fetch('/api/drone/command', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command })
-    });
-    const data = await res.json();
-    console.log(`✅ ${command}:`, data.message || data.detail || "OK");
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({
+        type: "command",
+        data: command
+      }));
+      console.log(`📤 Sent via WS: ${command}`);
+    } else {
+      console.warn(`⚠️ WebSocket not ready. Command "${command}" not sent.`);
+    }
   } catch (err) {
     console.error(`❌ ${command}:`, err);
   }
@@ -31,10 +61,10 @@ function pollGamepad() {
   if (!gp) return requestAnimationFrame(pollGamepad);
 
   const [ali, ele, rud, thr] = [
-    gp.axes[0] || 0,           // CH1 - Roll (AIL) — БОЛЬШЕ НЕ ИНВЕРТИРУЕМ
-    gp.axes[1] || 0,           // CH2 - Pitch (ELE)
-    -gp.axes[2] || 0,          // CH4 - Yaw (RUD), инвертирован
-    gp.axes[3] || 0            // CH3 - Throttle (THR)
+    gp.axes[0] || 0,
+    gp.axes[1] || 0,
+    -gp.axes[2] || 0,
+    gp.axes[3] || 0
   ];
 
   const dotL = document.getElementById("dot-left");
@@ -45,7 +75,6 @@ function pollGamepad() {
   dotR.style.left = `${40 + ali * 30}px`;
   dotR.style.top = `${40 + ele * 30}px`;
 
-  // CH5–CH8 через .pressed, .value может быть 1.0 или 0.0 на переключателях
   const ch5 = gp.buttons[4]?.pressed ? 1 : 0;
   const ch6 = gp.buttons[5]?.pressed ? 1 : 0;
   const ch7 = gp.buttons[6]?.pressed ? 1 : 0;
