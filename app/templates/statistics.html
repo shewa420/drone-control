@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Статистика польотів — Drone Control{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Статистика польотів</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6>Усі польоти</h6>
+            <p class="fs-4">120</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6>Загальний час</h6>
+            <p class="fs-4">35 год</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6>Загальна відстань</h6>
+            <p class="fs-4">250 км</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h6>Середня швидкість</h6>
+            <p class="fs-4">25,0 км/год</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="text-center">Загальний час польотів</h6>
+            <canvas id="flightTimeChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="text-center">Пройдено кілометрів</h6>
+            <canvas id="distanceChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="text-center">Польоти за типом завдання</h6>
+            <canvas id="taskTypeChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const months = ['Січ', 'Бер', 'Трав', 'Лип', 'Вер', 'Лис'];
+
+    new Chart(document.getElementById('flightTimeChart'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Години',
+                data: [2, 3, 5, 4, 6, 5],
+                backgroundColor: 'rgba(0, 123, 255, 0.3)',
+                borderColor: '#007bff',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('distanceChart'), {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Км',
+                data: [5, 15, 25, 30, 35, 45],
+                backgroundColor: 'rgba(0, 123, 255, 0.5)'
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('taskTypeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Огляд', 'Фото', 'Розвідка', 'Інше'],
+            datasets: [{
+                data: [50, 30, 10, 10],
+                backgroundColor: ['#007bff', '#6c757d', '#17a2b8', '#ffc107']
+            }]
+        }
+    });
+</script>
+{% endblock %}

@@ -1,42 +1,33 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-
-from . import models, database
-from .auth import router as auth_router
-from .admin import router as admin_router
-from .routers import drone, ws
-
-models.Base.metadata.create_all(bind=database.engine)
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
-from .database import SessionLocal
-import hashlib
+# Статичні файли (CSS, JS, images)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-def create_admin_if_not_exists():
-    db = SessionLocal()
-    existing = db.query(models.User).filter(models.User.username == "admin").first()
-    if not existing:
-        admin_user = models.User(
-            username="admin",
-            password=hashlib.sha256("admin123".encode()).hexdigest(),
-            is_admin=True,
-            is_approved=True
-        )
-        db.add(admin_user)
-        db.commit()
-        print("✅ Адміністратор створений: admin / admin123")
-    else:
-        print("ℹ️ Адміністратор уже існує")
-    db.close()
+# Шаблони
+templates = Jinja2Templates(directory="app/templates")
 
-create_admin_if_not_exists()
+# Головна сторінка (опціонально)
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# Подключаем роутеры
-app.include_router(ws.router)
-app.include_router(auth_router)
-app.include_router(admin_router)
-app.include_router(drone.router)
+# Панель керування
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
 
-# Подключаем фронтенд
-app.mount("/", StaticFiles(directory="app/static/frontend", html=True), name="static")
+# WebSocket для Raspberry Pi
+@app.websocket("/ws/pi")
+async def websocket_pi(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print("RC data from client:", data)  # або парсинг JSON
+    except WebSocketDisconnect:
+        print("❌ WebSocket розірвано")

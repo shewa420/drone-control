@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Головна - Drone Control{% endblock %}
+
+{% block content %}
+<div class="row align-items-center py-5">
+    <div class="col-md-6 text-center text-md-start">
+        <h1 class="display-5 fw-bold mb-3">Керуй своїм дроном дистанційно</h1>
+        <p class="lead text-muted mb-4">
+            Просунута система для моніторингу та керування дронами на відстані.
+        </p>
+        <a href="/dashboard" class="btn btn-primary btn-lg me-2">Почати роботу</a>
+        <a href="#" class="btn btn-outline-secondary btn-lg">Докладніше</a>
+    </div>
+    <div class="col-md-6 text-center">
+        <img src="{{ url_for('static', path='images/drone.png') }}" alt="Drone" class="img-fluid" style="max-height: 320px;">
+    </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row text-center">
+    <div class="col-md-4 mb-4">
+        <h4 class="fw-semibold">Про систему</h4>
+        <p class="text-muted">
+            Зручна онлайн-платформа для керування дронами з будь-якої локації.
+        </p>
+    </div>
+    <div class="col-md-4 mb-4">
+        <h4 class="fw-semibold">Підключення по LTE/Wi-Fi</h4>
+        <p class="text-muted">
+            Працює через глобальну мережу з використанням веб-інтерфейсу.
+        </p>
+    </div>
+    <div class="col-md-4 mb-4">
+        <h4 class="fw-semibold">Безпека і доступ</h4>
+        <p class="text-muted">
+            Авторизація користувачів, облік польотів і телеметрія.
+        </p>
+    </div>
+</div>
+{% endblock %}

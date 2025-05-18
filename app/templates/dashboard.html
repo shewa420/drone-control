@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Панель керування — Drone Control{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="list-group shadow-sm">
+            <a href="/dashboard" class="list-group-item list-group-item-action active">Панель керування</a>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">Керування</h5>
+                        <button class="btn btn-primary w-100 mt-3">Запустити дрон</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Статус дрона</h5>
+                        <p class="text-muted fs-5">Неактивний</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Камера</h5>
+                        <div class="bg-light border rounded mt-2" style="height: 150px;">
+                            <img src="{{ url_for('static', path='images/camera_placeholder.png') }}" class="img-fluid h-100 object-fit-contain p-2" alt="Camera View">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header fw-semibold">Телеметрія</div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3"><h6>Висота</h6><p class="text-muted">-- м</p></div>
+                            <div class="col-md-4 mb-3"><h6>Швидкість</h6><p class="text-muted">-- км/год</p></div>
+                            <div class="col-md-4 mb-3"><h6>Акумулятор</h6><p class="text-muted">-- %</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header fw-semibold">WebSocket-з’єднання та канали</div>
+                    <div class="card-body">
+                        <p>Статус: <span id="status-text" class="text-danger">Немає з’єднання</span></p>
+                        <div id="rc-display" class="row row-cols-2 row-cols-md-4 gy-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/dashboard.js') }}"></script>
+{% endblock %}

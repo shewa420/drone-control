@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Налаштування — Drone Control{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Налаштування дронів</h2>
+
+<div class="card p-4 mb-4">
+    <form>
+        <div class="mb-3">
+            <label for="droneName" class="form-label">Назва дрона</label>
+            <input type="text" class="form-control" id="droneName" placeholder="Наприклад: Recon-X3">
+        </div>
+        <div class="mb-3">
+            <label for="connection" class="form-label">Тип з'єднання</label>
+            <select class="form-select" id="connection">
+                <option selected>LTE</option>
+                <option>Wi-Fi</option>
+                <option>Провідне (UART)</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="notes" class="form-label">Коментар або опис</label>
+            <textarea class="form-control" id="notes" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Зберегти</button>
+    </form>
+</div>
+{% endblock %}

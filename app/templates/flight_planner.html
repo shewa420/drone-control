@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Планування маршруту — Drone Control{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Планування маршруту</h2>
+
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 mb-4">
+        <div class="list-group shadow-sm">
+            <a href="/dashboard" class="list-group-item list-group-item-action">Панель керування</a>
+            <a href="#" class="list-group-item list-group-item-action">Мої дрони</a>
+            <a href="/flight-planner" class="list-group-item list-group-item-action active">Польотні завдання</a>
+            <a href="#" class="list-group-item list-group-item-action">Журнали</a>
+        </div>
+    </div>
+
+    <!-- Map & Controls -->
+    <div class="col-md-9">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-3">
+                        <label for="height" class="form-label">Висота</label>
+                        <input type="number" class="form-control" id="height" placeholder="100" value="100">
+                        <div class="form-text">метри</div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <label for="speed" class="form-label">Швидкість</label>
+                        <input type="number" class="form-control" id="speed" placeholder="15" value="15">
+                        <div class="form-text">км/год</div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button class="btn btn-primary w-100">Виконати завдання</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body text-center p-0">
+                <img src="{{ url_for('static', path='images/map_placeholder.png') }}" alt="Map" class="img-fluid">
+            </div>
+        </div>
+
+        <div class="row text-center">
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h6>Дистанція</h6>
+                    <p class="text-muted fs-5">3,2 км</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h6>Зведена інформація</h6>
+                    <p class="text-muted fs-5">12 хв</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
