@@ -31,3 +31,14 @@ async def websocket_pi(websocket: WebSocket):
             print("RC data from client:", data)  # або парсинг JSON
     except WebSocketDisconnect:
         print("❌ WebSocket розірвано")
+@app.get("/flight-planner", response_class=HTMLResponse)
+async def planner(request: Request):
+    return templates.TemplateResponse("flight_planner.html", {"request": request})
+
+@app.get("/statistics", response_class=HTMLResponse)
+async def statistics(request: Request):
+    return templates.TemplateResponse("statistics.html", {"request": request})
+
+@app.get("/settings", response_class=HTMLResponse)
+async def settings(request: Request):
+    return templates.TemplateResponse("settings.html", {"request": request})
