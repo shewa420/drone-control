@@ -42,3 +42,13 @@ async def statistics(request: Request):
 @app.get("/settings", response_class=HTMLResponse)
 async def settings(request: Request):
     return templates.TemplateResponse("settings.html", {"request": request})
+
+from app import models, database
+from app.auth import router as auth_router
+
+models.Base.metadata.create_all(bind=database.engine)
+app.include_router(auth_router)
+
+@app.get("/ping")
+async def ping():
+    return {"status": "ok"}
