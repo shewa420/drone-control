@@ -13,7 +13,7 @@ app = FastAPI()
 # Разрешённые источники
 origins = [
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:8000",
     "https://lte-drone-control.onrender.com",
     "https://shewa420-drone-control.onrender.com",
 ]

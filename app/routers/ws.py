@@ -1,3 +1,5 @@
+# app/routers/ws.py
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import List
 
@@ -6,20 +8,13 @@ router = APIRouter()
 connected_pis: List[WebSocket] = []
 connected_clients: List[WebSocket] = []
 
-allowed_origins = {
+allowed_origins = [
     "https://lte-drone-control.onrender.com",
-    "https://shewa420-drone-control.onrender.com",
-    "http://localhost:8080"
-}
+    "http://localhost:8000"
+]
 
 @router.websocket("/ws/pi")
 async def websocket_endpoint_pi(websocket: WebSocket):
-    origin = websocket.headers.get('origin')
-    if origin not in allowed_origins:
-        print(f"[REJECTED PI] origin: {origin}")
-        await websocket.close(code=1008)
-        return
-
     await websocket.accept()
     connected_pis.append(websocket)
     print("[SERVER] Raspberry Pi connected")
@@ -28,6 +23,7 @@ async def websocket_endpoint_pi(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             print(f"[FROM PI] {data}")
+            # Рассылаем всем клиентам браузера
             for client in connected_clients:
                 await client.send_text(f"[Telemetry] {data}")
     except WebSocketDisconnect:
@@ -36,7 +32,7 @@ async def websocket_endpoint_pi(websocket: WebSocket):
 
 @router.websocket("/ws/client")
 async def websocket_endpoint_client(websocket: WebSocket):
-    origin = websocket.headers.get('origin')
+    origin = websocket.headers.get("origin")
     if origin not in allowed_origins:
         print(f"[REJECTED CLIENT] origin: {origin}")
         await websocket.close(code=1008)
