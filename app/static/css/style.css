@@ -30,3 +30,16 @@ h1, h2, h3, h4, h5 {
 footer {
     font-size: 0.875rem;
 }
+#sticks-container {
+  display: flex;
+  gap: 30px;
+  margin-top: 15px;
+}
+canvas {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+#aux-channels {
+  margin-top: 15px;
+}

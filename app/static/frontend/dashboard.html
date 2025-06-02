@@ -1,166 +1,91 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Керування дроном</title>
+  <title>Панель керування дроном</title>
+  <link rel="stylesheet" href="/static/frontend/style.css">
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #fff;
-      color: #111;
-    }
-
-    header {
-      background-color: #d40000;
-      color: white;
-      padding: 15px 20px;
-      font-size: 20px;
+    #sticks-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      gap: 30px;
+      margin-top: 15px;
     }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 20px;
+    canvas {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
     }
-
-    .container {
-      padding: 20px;
+    #aux-channels {
+      margin-top: 15px;
     }
-
-    .stick-visual {
-      display: flex;
-      gap: 40px;
+    #video-frame {
       margin-top: 20px;
-    }
-
-    .stick {
-      width: 100px;
-      height: 100px;
-      background: #f1f1f1;
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16 / 9;
       border: 2px solid #ccc;
-      border-radius: 12px;
-      position: relative;
+      border-radius: 8px;
     }
-
-    .dot {
-      width: 20px;
-      height: 20px;
-      background: #d40000;
-      border-radius: 50%;
-      position: absolute;
-      top: 40px;
-      left: 40px;
-      transition: all 0.1s linear;
-    }
-
-    .label {
-      text-align: center;
-      margin-top: 5px;
-      font-size: 14px;
-    }
-
-    .bar-container {
-      margin-top: 30px;
-      max-width: 500px;
-    }
-
-    .bar {
+    #control-buttons {
+      margin-top: 20px;
       display: flex;
-      align-items: center;
-      margin-bottom: 6px;
+      gap: 10px;
     }
-
-    .bar-label {
-      width: 60px;
-      font-size: 13px;
-    }
-
-    .bar-aux-label {
-      width: 100px;
-      font-size: 13px;
-      text-align: left;
-      margin-left: 10px;
-      color: #555;
-    }
-
-    .bar-track {
-      flex-grow: 1;
-      height: 14px;
-      background: #eee;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-left: 10px;
-    }
-
-    .bar-fill {
-      height: 100%;
-      transition: width 0.1s ease;
-    }
-
-    .color-ch5 { background-color: red; }
-    .color-ch6 { background-color: brown; }
-    .color-ch7 { background-color: gray; }
-    .color-ch8 { background-color: magenta; }
   </style>
 </head>
 <body>
   <header>
-    <div>🛸 Drone Control</div>
+    <h1>Drone Control</h1>
     <nav>
-      <a href="index.html">Вхід</a>
-      <a href="dashboard.html">Панель</a>
-      <a href="admin.html">Адмін</a>
+      <a href="/">Головна</a>
+      <a href="/dashboard.html" class="active">Панель</a>
+      <a href="#">Маршрути</a>
+      <a href="#">Статистика</a>
+      <a href="#">Налаштування</a>
+      <a href="/logout" style="color:red;">Вийти</a>
     </nav>
   </header>
 
-  <div class="container">
-    <h1>Керування дроном</h1>
-    <p id="status">Очікування джойстика або клавіатури...</p>
+  <main>
+    <section>
+      <h2>Статус системи</h2>
+      <p>WebSocket-з'єднання: <span id="conn-status" style="color:green">Очікування...</span></p>
+      <p id="status">🎮 Очікування на підключення пульта...</p>
+    </section>
 
-    <div class="stick-visual">
+    <section id="control-buttons">
+      <button onclick="sendStartStream()">▶️ Почати трансляцію</button>
+      <button onclick="sendStopStream()">⏹ Зупинити трансляцію</button>
+    </section>
+
+    <section id="video-frame">
+      <iframe width="100%" height="100%"
+              src="https://www.youtube.com/embed/yaz2-kd5w-zmb2-ugse-5ez4?autoplay=1&mute=1"
+              frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+      </iframe>
+    </section>
+
+    <section id="sticks-container">
       <div>
-        <div class="stick" id="stick-left">
-          <div class="dot" id="dot-left"></div>
-        </div>
-        <div class="label">CH3 (THR) + CH4 (RUD)</div>
+        <h4>Throttle / Yaw</h4>
+        <canvas id="stick-left" width="150" height="150"></canvas>
       </div>
       <div>
-        <div class="stick" id="stick-right">
-          <div class="dot" id="dot-right"></div>
-        </div>
-        <div class="label">CH1 (AIL) + CH2 (ELE)</div>
+        <h4>Roll / Pitch</h4>
+        <canvas id="stick-right" width="150" height="150"></canvas>
       </div>
-    </div>
+    </section>
 
-    <div class="bar-container">
-      <div class="bar">
-        <div class="bar-label">CH5</div>
-        <div class="bar-track"><div id="bar-ch5" class="bar-fill color-ch5" style="width: 0%"></div></div>
-        <div class="bar-aux-label">ARM</div>
-      </div>
-      <div class="bar">
-        <div class="bar-label">CH6</div>
-        <div class="bar-track"><div id="bar-ch6" class="bar-fill color-ch6" style="width: 0%"></div></div>
-        <div class="bar-aux-label">FLIGHT MODE</div>
-      </div>
-      <div class="bar">
-        <div class="bar-label">CH7</div>
-        <div class="bar-track"><div id="bar-ch7" class="bar-fill color-ch7" style="width: 0%"></div></div>
-        <div class="bar-aux-label">BEEPER</div>
-      </div>
-      <div class="bar">
-        <div class="bar-label">CH8</div>
-        <div class="bar-track"><div id="bar-ch8" class="bar-fill color-ch8" style="width: 0%"></div></div>
-        <div class="bar-aux-label">CUSTOM</div>
-      </div>
-    </div>
-  </div>
+    <section id="aux-channels">
+      <h4>Канали CH5–CH8</h4>
+      <p id="aux-values">--</p>
+    </section>
+  </main>
 
-  <script src="dashboard.js"></script>
+  <footer>
+    <p>© 2025 Drone Control • Пілот підтримується</p>
+  </footer>
+
+  <script src="/static/frontend/dashboard.js"></script>
 </body>
 </html>

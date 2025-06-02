@@ -52,3 +52,6 @@ app.include_router(auth_router)
 @app.get("/ping")
 async def ping():
     return {"status": "ok"}
+
+from app.auth import router as auth_router
+app.include_router(auth_router)
