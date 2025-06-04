@@ -62,3 +62,24 @@ async def settings(request: Request):
 @app.get("/ping")
 async def ping():
     return {"status": "ok"}
+
+
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+
+from app import models
+from app.database import engine
+from app.auth import router as auth_router
+
+models.Base.metadata.create_all(bind=engine)
+
+def create_app():
+    app = FastAPI()
+    app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
+
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    app.include_router(auth_router)
+
+    return app

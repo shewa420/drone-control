@@ -1,63 +1,46 @@
-from fastapi import APIRouter, Request, Form, Depends, status, HTTPException
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi import APIRouter, Depends, Request, Form
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from starlette.status import HTTP_302_FOUND
+from app.database import SessionLocal
+from app.models import User
+from app.schemas import UserCreate
 from passlib.hash import bcrypt
-from app import models, database, schemas
-from fastapi.templating import Jinja2Templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
 def get_db():
-    db = database.SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
-# ========== 📄 HTML СТОРІНКИ ==========
-
-@router.get("/register", response_class=HTMLResponse)
-def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
-
-@router.get("/login", response_class=HTMLResponse)
-def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
-# ========== ✅ ОБРОБКА ФОРМИ РЕЄСТРАЦІЇ ==========
+@router.get("/register")
+def register_form():
+    return {"form": "register"}
 
 @router.post("/register")
-def register_form(
-    request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    existing_user = db.query(models.User).filter_by(username=username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Користувач вже існує")
-
+def register_user(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     hashed_pw = bcrypt.hash(password)
-    new_user = models.User(username=username, password=hashed_pw)
-    db.add(new_user)
+    user = User(username=username, password=hashed_pw)
+    db.add(user)
     db.commit()
-    db.refresh(new_user)
+    return RedirectResponse("/login", status_code=HTTP_302_FOUND)
 
-    return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
-
-# ========== ✅ ОБРОБКА ФОРМИ ВХОДУ ==========
+@router.get("/login")
+def login_form():
+    return {"form": "login"}
 
 @router.post("/login")
-def login_form(
-    request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    user = db.query(models.User).filter_by(username=username).first()
+def login_user(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
     if not user or not bcrypt.verify(password, user.password):
-        raise HTTPException(status_code=401, detail="Невірне ім'я користувача або пароль")
+        return RedirectResponse("/login", status_code=HTTP_302_FOUND)
+    request.session["user"] = user.username
+    return RedirectResponse("/", status_code=HTTP_302_FOUND)
 
-    # У майбутньому можна встановлювати cookie/token тут
-    return RedirectResponse(url="/dashboard", status_code=status.HTTP_302_FOUND)
+@router.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/login", status_code=HTTP_302_FOUND)

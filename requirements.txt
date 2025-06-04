@@ -6,3 +6,7 @@ python-multipart
 jinja2
 aiofiles
 passlib[bcrypt]
+flask
+flask-login
+flask-sqlalchemy
+werkzeug
