@@ -1,8 +1,7 @@
 // app/static/js/dashboard.js
 let socket = null;
 let currentRC = new Array(8).fill(1500);
-let lastSticks = new Array(4).fill(1500);
-let lastSwitches = [1000, 1000, 1000, 1000];
+let lastRC = new Array(8).fill(1500);
 
 function connectSocket() {
   socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
@@ -61,9 +60,7 @@ window.addEventListener("gamepadconnected", () => {
     const ch7 = gp.buttons[6]?.pressed ? 2000 : 1000;
     const ch8 = gp.buttons[7]?.pressed ? 2000 : 1000;
 
-    const sticks = [ch1, ch2, ch3, ch4];
-    const switches = [ch5, ch6, ch7, ch8];
-    currentRC = [...sticks, ...switches];
+    currentRC = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
 
     // Update sticks
     document.getElementById("dot-left").style.left = `${(ch3 - 1000) / 100 * 3.5}px`;
@@ -74,23 +71,13 @@ window.addEventListener("gamepadconnected", () => {
     // Display CH5–CH8
     document.getElementById("ch5-8").textContent = `${ch5} / ${ch6} / ${ch7} / ${ch8}`;
 
-    // Send updated sticks
-    if (JSON.stringify(sticks) !== JSON.stringify(lastSticks)) {
+    // Always send full RC array if changed
+    if (JSON.stringify(currentRC) !== JSON.stringify(lastRC)) {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: "rc", channels: currentRC }));
+        lastRC = [...currentRC];
       }
-      lastSticks = [...sticks];
     }
-
-    // Send switch changes
-    switches.forEach((val, i) => {
-      if (val !== lastSwitches[i]) {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify({ type: "rc", channels: [...currentRC] }));
-        }
-        lastSwitches[i] = val;
-      }
-    });
   }, 100);
 });
 
