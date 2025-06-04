@@ -3,6 +3,7 @@ let socket = null;
 let currentRC = new Array(8).fill(1500);
 let lastSentRC = new Array(8).fill(1500);
 let lastSwitchState = [1000, 1000, 1000, 1000];
+let gamepadIndex = null;
 
 function connectSocket() {
   socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
@@ -31,17 +32,32 @@ function connectSocket() {
 
 connectSocket();
 
-function scale(value) {
+function scaleAxis(value) {
   return Math.round(((value + 1) / 2) * 1000 + 1000);
 }
 
 function updateGamepad() {
   const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+  let gp = null;
 
-  if (!gamepads || !gamepads[0]) return;
+  if (gamepadIndex !== null && gamepads[gamepadIndex]) {
+    gp = gamepads[gamepadIndex];
+  } else {
+    for (let i = 0; i < gamepads.length; i++) {
+      if (gamepads[i]) {
+        gp = gamepads[i];
+        gamepadIndex = i;
+        console.log("🎮 Геймпад знайдено в слоті", i);
+        const status = document.getElementById("status");
+        if (status) status.textContent = "🎮 Джойстик підключено!";
+        break;
+      }
+    }
+  }
 
-  const gp = gamepads[0];
+  if (!gp) return;
 
+  // RC sticks
   const [ail, ele, thr, rud] = [
     gp.axes[0] || 0,
     -(gp.axes[1] || 0),
@@ -49,34 +65,32 @@ function updateGamepad() {
     -(gp.axes[2] || 0)
   ];
 
-  const ch1 = scale(ail);
-  const ch2 = scale(ele);
-  const ch3 = scale(thr);
-  const ch4 = scale(rud);
+  const ch1 = scaleAxis(ail);
+  const ch2 = scaleAxis(ele);
+  const ch3 = scaleAxis(thr);
+  const ch4 = scaleAxis(rud);
 
-  const ch5 = gp.buttons[4]?.pressed ? 2000 : 1000;
-  const ch6 = gp.buttons[5]?.pressed ? 2000 : 1000;
-  const ch7 = gp.buttons[6]?.pressed ? 2000 : 1000;
-  const ch8 = gp.buttons[7]?.pressed ? 2000 : 1000;
+  // CH5–CH8 from AXIS 4–6 + fallback
+  const ch5 = scaleAxis(gp.axes[4] ?? -1);  // ось у центрі ≈ 1500
+  const ch6 = scaleAxis(gp.axes[5] ?? -1);
+  const ch7 = scaleAxis(gp.axes[6] ?? -1);
+  const ch8 = scaleAxis(gp.axes[7] ?? -1);
 
   const switches = [ch5, ch6, ch7, ch8];
   const sticks = [ch1, ch2, ch3, ch4];
 
   currentRC = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
 
-  // Send stick updates
   if (JSON.stringify(sticks) !== JSON.stringify(lastSentRC.slice(0, 4))) {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({
         type: "rc",
         channels: currentRC
       }));
-      console.log("🛰️ Sent RC:", currentRC);
       lastSentRC = [...currentRC];
     }
   }
 
-  // Send switch updates
   switches.forEach((val, i) => {
     if (val !== lastSwitchState[i]) {
       currentRC[4 + i] = val;
@@ -85,7 +99,6 @@ function updateGamepad() {
           type: "rc",
           channels: [...currentRC]
         }));
-        console.log("🛰️ Switch update:", currentRC);
       }
       lastSwitchState[i] = val;
     }
@@ -103,9 +116,4 @@ function updateGamepad() {
   document.getElementById("bar-ch8").textContent = ch8;
 }
 
-window.addEventListener("gamepadconnected", () => {
-  const status = document.getElementById("status");
-  if (status) status.textContent = "🎮 Джойстик підключено!";
-  console.log("🎮 Gamepad connected");
-  setInterval(updateGamepad, 100);
-});
+setInterval(updateGamepad, 100);
