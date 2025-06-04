@@ -8,9 +8,10 @@ function connectSocket() {
 
   socket.onopen = () => {
     console.log("✅ WebSocket connected");
-    document.getElementById("status-text").classList.remove("text-danger");
-    document.getElementById("status-text").classList.add("text-success");
-    document.getElementById("status-text").textContent = "Connected";
+    const statusText = document.getElementById("status-text");
+    statusText.classList.remove("text-danger");
+    statusText.classList.add("text-success");
+    statusText.textContent = "Connected";
 
     setInterval(() => {
       if (socket.readyState === WebSocket.OPEN) {
@@ -26,9 +27,10 @@ function connectSocket() {
 
   socket.onerror = (e) => console.error("❌ WebSocket error:", e);
   socket.onclose = () => {
-    document.getElementById("status-text").classList.remove("text-success");
-    document.getElementById("status-text").classList.add("text-danger");
-    document.getElementById("status-text").textContent = "Disconnected";
+    const statusText = document.getElementById("status-text");
+    statusText.classList.remove("text-success");
+    statusText.classList.add("text-danger");
+    statusText.textContent = "Disconnected";
     console.warn("🔌 WebSocket closed, reconnecting...");
     setTimeout(connectSocket, 2000);
   };
@@ -37,6 +39,29 @@ connectSocket();
 
 function scale(v) {
   return Math.round(((v + 1) / 2) * 1000 + 1000);
+}
+
+function drawStick(canvasId, xValue, yValue) {
+  const canvas = document.getElementById(canvasId);
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.beginPath();
+  ctx.arc(xValue, yValue, 4, 0, 2 * Math.PI);
+  ctx.fillStyle = "black";
+  ctx.fill();
+}
+
+function updateSticks(ch1, ch2, ch3, ch4) {
+  const xLeft = (ch4 - 1000) / 1000 * 100;
+  const yLeft = (2000 - ch3) / 1000 * 100;
+  drawStick("dot-left", xLeft, yLeft);
+
+  const xRight = (ch1 - 1000) / 1000 * 100;
+  const yRight = (2000 - ch2) / 1000 * 100;
+  drawStick("dot-right", xRight, yRight);
 }
 
 window.addEventListener("gamepadconnected", () => {
@@ -61,22 +86,15 @@ window.addEventListener("gamepadconnected", () => {
     const ch8 = gp.buttons[7]?.pressed ? 2000 : 1000;
 
     currentRC = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
+    updateSticks(ch1, ch2, ch3, ch4);
 
-    // Update sticks
-    document.getElementById("dot-left").style.left = `${(ch3 - 1000) / 100 * 3.5}px`;
-    document.getElementById("dot-left").style.top = `${(ch4 - 1000) / 100 * 3.5}px`;
-    document.getElementById("dot-right").style.left = `${(ch1 - 1000) / 100 * 3.5}px`;
-    document.getElementById("dot-right").style.top = `${(ch2 - 1000) / 100 * 3.5}px`;
-
-    // Display CH5–CH8
     document.getElementById("ch5-8").textContent = `${ch5} / ${ch6} / ${ch7} / ${ch8}`;
 
-    // Always send full RC array if changed
     if (JSON.stringify(currentRC) !== JSON.stringify(lastRC)) {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: "rc", channels: currentRC }));
-        lastRC = [...currentRC];
       }
+      lastRC = [...currentRC];
     }
   }, 100);
 });
@@ -85,14 +103,14 @@ window.addEventListener("gamepadconnected", () => {
 const startBtn = document.getElementById("startStream");
 const stopBtn = document.getElementById("stopStream");
 
-startBtn.addEventListener("click", () => {
+startBtn?.addEventListener("click", () => {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({ type: "stream", action: "start" }));
     console.log("▶️ Stream start sent");
   }
 });
 
-stopBtn.addEventListener("click", () => {
+stopBtn?.addEventListener("click", () => {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({ type: "stream", action: "stop" }));
     console.log("⏹️ Stream stop sent");
