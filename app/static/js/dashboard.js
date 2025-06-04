@@ -1,118 +1,68 @@
-
 let socket = null;
 let currentRC = new Array(8).fill(1500);
-let lastSentRC = new Array(8).fill(1500);
-let gamepadIndex = null;
-let lastSendTime = 0;
+let lastSwitchState = [1000, 1000, 1000, 1000];
 
 function connectSocket() {
   socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
 
-  socket.onopen = () => {
-    console.log("✅ WS connected");
-    const wsStatus = document.getElementById("ws-status");
-    if (wsStatus) {
-      wsStatus.textContent = "З'єднано";
-      wsStatus.style.color = "green";
-    }
-  };
-
+  socket.onopen = () => console.log("✅ WS connected");
   socket.onerror = (e) => console.error("❌ WS error:", e);
-
   socket.onclose = () => {
     console.warn("🔌 WS closed");
-    const wsStatus = document.getElementById("ws-status");
-    if (wsStatus) {
-      wsStatus.textContent = "Відключено";
-      wsStatus.style.color = "red";
-    }
     setTimeout(connectSocket, 2000);
   };
 }
 
 connectSocket();
 
-function scaleAxis(value) {
-  return Math.round(((value + 1) / 2) * 1000 + 1000);
+function scale(v) {
+  return Math.round(((v + 1) / 2) * 1000 + 1000);
 }
 
-function getRCValues(gp) {
-  const [ail, ele, thr, rud] = [
-    gp.axes[0] || 0,
-    -(gp.axes[1] || 0),
-    gp.axes[3] || 0,
-    -(gp.axes[2] || 0)
-  ];
+window.addEventListener("gamepadconnected", () => {
+  document.getElementById("status").textContent = "🎮 Джойстик підключено!";
+  console.log("🎮 Gamepad connected");
 
-  const ch1 = scaleAxis(ail);
-  const ch2 = scaleAxis(ele);
-  const ch3 = scaleAxis(thr);
-  const ch4 = scaleAxis(rud);
+  setInterval(() => {
+    const gp = navigator.getGamepads()[0];
+    if (!gp) return;
 
-  const ch5 = scaleAxis(gp.axes[4] ?? -1);
-  const ch6 = scaleAxis(gp.axes[5] ?? -1);
-  const ch7 = scaleAxis(gp.axes[6] ?? -1);
-  const ch8 = 1000;
+    const [ail, ele, thr, rud] = [
+      gp.axes[0] || 0,
+      -(gp.axes[1] || 0),
+      gp.axes[3] || 0,
+      -(gp.axes[2] || 0)
+    ];
 
-  return [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
-}
+    const ch1 = scale(ail);
+    const ch2 = scale(ele);
+    const ch3 = scale(thr);
+    const ch4 = scale(rud);
 
-function arraysSimilar(a, b, threshold = 5) {
-  for (let i = 0; i < a.length; i++) {
-    if (Math.abs(a[i] - b[i]) > threshold) return false;
-  }
-  return true;
-}
+    const ch5 = gp.buttons[4]?.pressed ? 2000 : 1000;
+    const ch6 = gp.buttons[5]?.pressed ? 2000 : 1000;
+    const ch7 = gp.buttons[6]?.pressed ? 2000 : 1000;
+    const ch8 = gp.buttons[7]?.pressed ? 2000 : 1000;
 
-function updateGamepad() {
-  const now = Date.now();
-  if (now - lastSendTime < 200) return;
-
-  const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-  let gp = null;
-
-  if (gamepadIndex !== null && gamepads[gamepadIndex]) {
-    gp = gamepads[gamepadIndex];
-  } else {
-    for (let i = 0; i < gamepads.length; i++) {
-      if (gamepads[i]) {
-        gp = gamepads[i];
-        gamepadIndex = i;
-        console.log("🎮 Геймпад знайдено в слоті", i);
-        const status = document.getElementById("status");
-        if (status) status.textContent = "🎮 Джойстик підключено!";
-        break;
-      }
-    }
-  }
-
-  if (!gp) return;
-
-  const rc = getRCValues(gp);
-
-  if (!arraysSimilar(rc, lastSentRC, 5)) {
-    currentRC = rc;
+    currentRC = [ch1, ch2, 3000 - ch3, ch4, ch5, ch6, ch7, ch8];
 
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({
         type: "rc",
-        channels: rc
+        channels: currentRC
       }));
-      lastSentRC = [...rc];
-      lastSendTime = now;
+      console.log("📤 Sent RC:", currentRC);
     }
 
     // GUI оновлення
-    document.getElementById("dot-left").style.left = `${33 + gp.axes[3] * 20}px`;
-    document.getElementById("dot-left").style.top = `${33 - gp.axes[2] * 20}px`;
-    document.getElementById("dot-right").style.left = `${33 + gp.axes[0] * 20}px`;
-    document.getElementById("dot-right").style.top = `${33 - gp.axes[1] * 20}px`;
+    document.getElementById("dot-left").style.left = `${40 + thr * 30}px`;
+    document.getElementById("dot-left").style.top = `${40 + rud * 30}px`;
+    document.getElementById("dot-right").style.left = `${40 + ail * 30}px`;
+    document.getElementById("dot-right").style.top = `${40 + ele * 30}px`;
 
-    document.getElementById("bar-ch5").textContent = rc[4];
-    document.getElementById("bar-ch6").textContent = rc[5];
-    document.getElementById("bar-ch7").textContent = rc[6];
-    document.getElementById("bar-ch8").textContent = rc[7];
-  }
-}
-
-setInterval(updateGamepad, 50);
+    document.getElementById("bar-ch5").textContent = ch5;
+    document.getElementById("bar-ch6").textContent = ch6;
+    document.getElementById("bar-ch7").textContent = ch7;
+    document.getElementById("bar-ch8").textContent = ch8;
+  }, 50); // 20 Гц
+});
