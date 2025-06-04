@@ -62,3 +62,6 @@ async def settings(request: Request):
 @app.get("/ping")
 async def ping():
     return {"status": "ok"}
+@app.get("/about", response_class=HTMLResponse)
+async def about(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
