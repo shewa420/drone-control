@@ -1,93 +1,97 @@
+<!-- app/templates/dashboard.html -->
 {% extends "base.html" %}
-{% block title %}Панель керування — Drone Control{% endblock %}
+{% block title %}Control Panel — Drone Control{% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-3 mb-4">
-        <div class="list-group shadow-sm">
-            <a href="/dashboard" class="list-group-item list-group-item-action active">Панель керування</a>
-        </div>
+  <div class="col-md-3 mb-4">
+    <div class="list-group shadow-sm">
+      <a href="/dashboard" class="list-group-item list-group-item-action active">Control Panel</a>
     </div>
-    <div class="col-md-9">
-        <div class="row g-4">
-
-            <!-- Блок керування -->
-            <div class="col-md-4">
-                <div class="card text-center h-100">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <h5 class="card-title">Керування</h5>
-                        <button onclick="sendStartStream()" class="btn btn-success w-100 mt-2">▶️ Старт трансляції</button>
-                        <button onclick="sendStopStream()" class="btn btn-danger w-100 mt-2">⏹ Стоп трансляції</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Статус -->
-            <div class="col-md-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Статус дрона</h5>
-                        <p class="text-muted fs-5">Неактивний</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Камера / YouTube -->
-            <div class="col-md-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Камера</h5>
-                        <div class="ratio ratio-16x9">
-                            <iframe id="yt-frame" src="https://www.youtube.com/embed/yaz2-kd5w-zmb2-ugse-5ez4?autoplay=1&mute=1"
-                                title="Drone Live Stream" allowfullscreen allow="autoplay; encrypted-media">
-                            </iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Телеметрія -->
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header fw-semibold">Телеметрія</div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-4 mb-3"><h6>Висота</h6><p class="text-muted">-- м</p></div>
-                            <div class="col-md-4 mb-3"><h6>Швидкість</h6><p class="text-muted">-- км/год</p></div>
-                            <div class="col-md-4 mb-3"><h6>Акумулятор</h6><p class="text-muted">-- %</p></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- WebSocket + RC -->
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header fw-semibold">WebSocket-з’єднання та RC-канали</div>
-                    <div class="card-body">
-                        <p>Статус: <span id="status-text" class="text-success">Очікування...</span></p>
-
-                        <div class="row row-cols-1 row-cols-md-2 g-3">
-                            <div class="col">
-                                <h6 class="text-center">Throttle / Yaw</h6>
-                                <canvas id="stick-left" width="150" height="150" class="d-block mx-auto border border-secondary rounded"></canvas>
-                            </div>
-                            <div class="col">
-                                <h6 class="text-center">Roll / Pitch</h6>
-                                <canvas id="stick-right" width="150" height="150" class="d-block mx-auto border border-secondary rounded"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <h6>Канали CH5 – CH8</h6>
-                            <p id="aux-values" class="text-muted">--</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+  </div>
+  <div class="col-md-9">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card text-center h-100">
+          <div class="card-body d-flex flex-column justify-content-between">
+            <h5 class="card-title">Control</h5>
+            <button id="startStream" class="btn btn-success w-100 mb-2">
+              <i class="bi bi-play-fill"></i> Start Stream
+            </button>
+            <button id="stopStream" class="btn btn-danger w-100">
+              <i class="bi bi-stop-fill"></i> Stop Stream
+            </button>
+          </div>
         </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <h5 class="card-title">Drone Status</h5>
+            <p class="text-muted fs-5">Inactive</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center h-100">
+          <div class="card-body">
+            <h5 class="card-title">Camera</h5>
+            <div class="ratio ratio-16x9 border rounded bg-dark">
+              <iframe
+                id="youtubeFrame"
+                src="https://www.youtube.com/embed/live_stream?channel=UCqR5GjaqVmQi5LeIvFMi1SQ&autoplay=1"
+                allowfullscreen
+                allow="autoplay; encrypted-media">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header fw-semibold">Telemetry</div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-4 mb-3">
+                <h6>Altitude</h6><p class="text-muted">-- m</p>
+              </div>
+              <div class="col-md-4 mb-3">
+                <h6>Speed</h6><p class="text-muted">-- km/h</p>
+              </div>
+              <div class="col-md-4 mb-3">
+                <h6>Battery</h6><p class="text-muted">-- %</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header fw-semibold">WebSocket Status & RC Channels</div>
+          <div class="card-body">
+            <p>Status: <span id="status-text" class="text-danger">Disconnected</span></p>
+            <div class="row text-center">
+              <div class="col-md-6">
+                <h6>Throttle / Yaw</h6>
+                <div id="stick-left" class="border rounded bg-light mx-auto" style="width:100px;height:100px;position:relative;">
+                  <div id="dot-left" style="width:10px;height:10px;background:#333;border-radius:50%;position:absolute;left:45px;top:45px;"></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6>Roll / Pitch</h6>
+                <div id="stick-right" class="border rounded bg-light mx-auto" style="width:100px;height:100px;position:relative;">
+                  <div id="dot-right" style="width:10px;height:10px;background:#333;border-radius:50%;position:absolute;left:45px;top:45px;"></div>
+                </div>
+              </div>
+            </div>
+            <p class="mt-3">Channels CH5 – CH8: <span id="ch5-8">--</span></p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
