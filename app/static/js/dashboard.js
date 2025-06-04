@@ -2,7 +2,6 @@
 let socket = null;
 let currentRC = new Array(8).fill(1500);
 let lastSentRC = new Array(8).fill(1500);
-let lastSwitchState = [1000, 1000, 1000, 1000];
 let gamepadIndex = null;
 
 function connectSocket() {
@@ -36,6 +35,27 @@ function scaleAxis(value) {
   return Math.round(((value + 1) / 2) * 1000 + 1000);
 }
 
+function getRCValues(gp) {
+  const [ail, ele, thr, rud] = [
+    gp.axes[0] || 0,
+    -(gp.axes[1] || 0),
+    gp.axes[3] || 0,
+    -(gp.axes[2] || 0)
+  ];
+
+  const ch1 = scaleAxis(ail);
+  const ch2 = scaleAxis(ele);
+  const ch3 = scaleAxis(thr);
+  const ch4 = scaleAxis(rud);
+
+  const ch5 = scaleAxis(gp.axes[4] ?? -1);
+  const ch6 = scaleAxis(gp.axes[5] ?? -1);
+  const ch7 = scaleAxis(gp.axes[6] ?? -1);
+  const ch8 = scaleAxis(gp.axes[7] ?? -1);
+
+  return [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
+}
+
 function updateGamepad() {
   const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
   let gp = null;
@@ -57,63 +77,32 @@ function updateGamepad() {
 
   if (!gp) return;
 
-  // RC sticks
-  const [ail, ele, thr, rud] = [
-    gp.axes[0] || 0,
-    -(gp.axes[1] || 0),
-    gp.axes[3] || 0,
-    -(gp.axes[2] || 0)
-  ];
+  const rc = getRCValues(gp);
 
-  const ch1 = scaleAxis(ail);
-  const ch2 = scaleAxis(ele);
-  const ch3 = scaleAxis(thr);
-  const ch4 = scaleAxis(rud);
+  // Якщо нічого не змінилось — не надсилаємо
+  if (JSON.stringify(rc) !== JSON.stringify(lastSentRC)) {
+    currentRC = rc;
 
-  // CH5–CH8 from AXIS 4–6 + fallback
-  const ch5 = scaleAxis(gp.axes[4] ?? -1);  // ось у центрі ≈ 1500
-  const ch6 = scaleAxis(gp.axes[5] ?? -1);
-  const ch7 = scaleAxis(gp.axes[6] ?? -1);
-  const ch8 = scaleAxis(gp.axes[7] ?? -1);
-
-  const switches = [ch5, ch6, ch7, ch8];
-  const sticks = [ch1, ch2, ch3, ch4];
-
-  currentRC = [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
-
-  if (JSON.stringify(sticks) !== JSON.stringify(lastSentRC.slice(0, 4))) {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({
         type: "rc",
-        channels: currentRC
+        channels: rc
       }));
-      lastSentRC = [...currentRC];
+      lastSentRC = [...rc];
     }
+
+    // GUI оновлення
+    document.getElementById("dot-left").style.left = `${33 + gp.axes[3] * 20}px`;
+    document.getElementById("dot-left").style.top = `${33 - gp.axes[2] * 20}px`;
+    document.getElementById("dot-right").style.left = `${33 + gp.axes[0] * 20}px`;
+    document.getElementById("dot-right").style.top = `${33 - gp.axes[1] * 20}px`;
+
+    document.getElementById("bar-ch5").textContent = rc[4];
+    document.getElementById("bar-ch6").textContent = rc[5];
+    document.getElementById("bar-ch7").textContent = rc[6];
+    document.getElementById("bar-ch8").textContent = rc[7];
   }
-
-  switches.forEach((val, i) => {
-    if (val !== lastSwitchState[i]) {
-      currentRC[4 + i] = val;
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          type: "rc",
-          channels: [...currentRC]
-        }));
-      }
-      lastSwitchState[i] = val;
-    }
-  });
-
-  // GUI
-  document.getElementById("dot-left").style.left = `${33 + thr * 20}px`;
-  document.getElementById("dot-left").style.top = `${33 + rud * 20}px`;
-  document.getElementById("dot-right").style.left = `${33 + ail * 20}px`;
-  document.getElementById("dot-right").style.top = `${33 + ele * 20}px`;
-
-  document.getElementById("bar-ch5").textContent = ch5;
-  document.getElementById("bar-ch6").textContent = ch6;
-  document.getElementById("bar-ch7").textContent = ch7;
-  document.getElementById("bar-ch8").textContent = ch8;
 }
 
+// 10 разів на секунду (100 мс)
 setInterval(updateGamepad, 100);
