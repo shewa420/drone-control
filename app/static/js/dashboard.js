@@ -3,6 +3,7 @@ let socket = null;
 let currentRC = new Array(8).fill(1500);
 let lastSentRC = new Array(8).fill(1500);
 let gamepadIndex = null;
+let lastSendTime = 0;
 
 function connectSocket() {
   socket = new WebSocket("wss://lte-drone-control.onrender.com/ws/client");
@@ -51,12 +52,22 @@ function getRCValues(gp) {
   const ch5 = scaleAxis(gp.axes[4] ?? -1);
   const ch6 = scaleAxis(gp.axes[5] ?? -1);
   const ch7 = scaleAxis(gp.axes[6] ?? -1);
-  const ch8 = scaleAxis(gp.axes[7] ?? -1);
+  const ch8 = 1000;
 
   return [ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8];
 }
 
+function arraysSimilar(a, b, threshold = 5) {
+  for (let i = 0; i < a.length; i++) {
+    if (Math.abs(a[i] - b[i]) > threshold) return false;
+  }
+  return true;
+}
+
 function updateGamepad() {
+  const now = Date.now();
+  if (now - lastSendTime < 200) return;
+
   const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
   let gp = null;
 
@@ -79,8 +90,7 @@ function updateGamepad() {
 
   const rc = getRCValues(gp);
 
-  // Якщо нічого не змінилось — не надсилаємо
-  if (JSON.stringify(rc) !== JSON.stringify(lastSentRC)) {
+  if (!arraysSimilar(rc, lastSentRC, 5)) {
     currentRC = rc;
 
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -89,6 +99,7 @@ function updateGamepad() {
         channels: rc
       }));
       lastSentRC = [...rc];
+      lastSendTime = now;
     }
 
     // GUI оновлення
@@ -104,5 +115,4 @@ function updateGamepad() {
   }
 }
 
-// 10 разів на секунду (100 мс)
-setInterval(updateGamepad, 100);
+setInterval(updateGamepad, 50);
