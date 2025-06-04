@@ -20,7 +20,7 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.url.path == url_for('main.index') %}active{% endif %}" href="{{ url_for('main.index') }}">Головна</a>
                     </li>
-                    {% if current_user.is_authenticated %}
+<!--                    {% if current_user.is_authenticated %}-->
                     <li class="nav-item">
                         <a class="nav-link {% if request.url.path.startswith('/dashboard') %}active{% endif %}" href="/dashboard">Панель</a>
                     </li>
@@ -33,16 +33,16 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.url.path.startswith('/settings') %}active{% endif %}" href="/settings">Налаштування</a>
                     </li>
-                    {% endif %}
-                    {% if current_user.is_authenticated %}
+<!--                    {% endif %}-->
+<!--                    {% if current_user.is_authenticated %}-->
                     <li class="nav-item">
                         <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">Вийти</a>
                     </li>
-                    {% else %}
+<!--                    {% else %}-->
                     <li class="nav-item">
                          <a class="nav-link text-primary" href="{{ url_for('auth.login') }}">Увійти</a>
                     </li>
-                    {% endif %}
+<!--                    {% endif %}-->
                 </ul>
             </div>
         </div>

@@ -66,3 +66,6 @@ def create_app():
 
     return app
 app = create_app()
+from starlette.middleware.sessions import SessionMiddleware
+
+app.add_middleware(SessionMiddleware, secret_key="super-secret-key")
