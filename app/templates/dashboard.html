@@ -1,64 +1,74 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <title>Панель управління дроном</title>
-  <link rel="stylesheet" href="/static/style.css" />
-  <style>
-    .stick-zone {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 20px;
-    }
-    .stick-block {
-      text-align: center;
-    }
-    canvas {
-      width: 120px;
-      height: 120px;
-      border: 1px solid #ccc;
-      background-color: #f9f9f9;
-    }
-    #status-text {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель керування</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script defer src="/static/js/dashboard.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Панель керування</h2>
-    <div id="status-text" class="text-danger">Disconnected</div>
+  <header>
+    <h1>Drone Control</h1>
+    <nav>
+      <a href="/">Головна</a>
+      <a href="/dashboard" class="active">Панель</a>
+      <a href="/flight-planner">Маршрути</a>
+      <a href="/statistics">Статистика</a>
+      <a href="/settings">Налаштування</a>
+      <a href="/logout" class="danger">Вийти</a>
+    </nav>
+  </header>
 
-    <div class="stick-zone">
-      <div class="stick-block">
-        <h4>Лівий стик</h4>
-        <canvas id="dot-left" width="120" height="120"></canvas>
+  <main>
+    <section class="top-panel">
+      <button class="tab active">Панель керування</button>
+
+      <div class="card">
+        <h3>Керування</h3>
+        <button id="startStream" class="btn green">▶️ Старт трансляції</button>
+        <button id="stopStream" class="btn red">⏹️ Стоп трансляції</button>
       </div>
-      <div class="stick-block">
-        <h4>Правий стик</h4>
-        <canvas id="dot-right" width="120" height="120"></canvas>
+
+      <div class="card">
+        <h3>Статус дрона</h3>
+        <p>Неактивний</p>
       </div>
-    </div>
 
-    <div style="margin-top: 10px">
-      <strong>CH5–CH8:</strong>
-      <span id="ch5-8">1500 / 1500 / 1500 / 1500</span>
-    </div>
+      <div class="card">
+        <h3>Камера</h3>
+        <iframe width="240" height="135" src="https://www.youtube.com/embed/live_stream?channel=UCqR5GjaqVmQi5LeIvFMi1SQ&autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>
+      </div>
+    </section>
 
-    <div style="margin-top: 20px">
-      <button id="startStream">▶️ Старт трансляції</button>
-      <button id="stopStream">⏹️ Зупинити</button>
-    </div>
+    <section class="telemetry">
+      <h3>Телеметрія</h3>
+      <div class="telemetry-grid">
+        <div><strong>Висота</strong><br>-- м</div>
+        <div><strong>Швидкість</strong><br>-- км/год</div>
+        <div><strong>Акумулятор</strong><br>-- %</div>
+      </div>
+    </section>
 
-    <div style="margin-top: 30px">
-      <iframe width="560" height="315"
-        src="https://www.youtube.com/embed/live_stream?channel=UCqR5GjaqVmQi5LeIvFMi1SQ&autoplay=1&mute=1"
-        frameborder="0" allowfullscreen>
-      </iframe>
-    </div>
-  </div>
+    <section class="rc-panel">
+      <h3>WebSocket-з'єднання та RC-канали</h3>
+      <p>Статус: <span id="status-text" class="text-danger">Розірвано</span></p>
+      <div class="sticks">
+        <div>
+          <h4>Throttle / Yaw</h4>
+          <canvas id="dot-left" width="200" height="200" class="stick-canvas"></canvas>
+        </div>
+        <div>
+          <h4>Roll / Pitch</h4>
+          <canvas id="dot-right" width="200" height="200" class="stick-canvas"></canvas>
+        </div>
+      </div>
+      <p>Канали CH5 – CH8: <span id="ch5-8">--</span></p>
+    </section>
+  </main>
 
-  <script src="/static/js/dashboard.js"></script>
+  <footer>
+    <p>&copy; 2025 Drone Control · Пілот підтримується</p>
+  </footer>
 </body>
 </html>
