@@ -2,81 +2,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2>Панель управління дроном</h2>
+<div class="container mt-3" style="max-width: 1100px;">
+  <h4 class="text-center mb-3">Панель управління дроном</h4>
 
-  <div class="row mt-4">
-    <div class="col-md-4">
-      <div class="card text-center">
-        <div class="card-body">
-          <h5 class="card-title">Control</h5>
-          <button class="btn btn-success mb-2" disabled>Start Stream</button>
-          <button class="btn btn-danger" disabled>Stop Stream</button>
-        </div>
+  <div class="d-flex justify-content-between flex-wrap gap-3">
+    <div class="card flex-fill text-center" style="min-width: 220px;">
+      <div class="card-body py-2">
+        <h6 class="card-title">Control</h6>
+        <button class="btn btn-success btn-sm mb-1" disabled>Start Stream</button>
+        <button class="btn btn-danger btn-sm" disabled>Stop Stream</button>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card text-center">
-        <div class="card-body">
-          <h5 class="card-title">Drone Status</h5>
-          <p class="card-text">Inactive</p>
-        </div>
+
+    <div class="card flex-fill text-center" style="min-width: 220px;">
+      <div class="card-body py-2">
+        <h6 class="card-title">Drone Status</h6>
+        <p class="card-text small">Inactive</p>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card text-center">
-        <div class="card-body">
-          <h5 class="card-title">Camera</h5>
-          <div class="ratio ratio-16x9 bg-dark text-white d-flex align-items-center justify-content-center rounded">
-            <span>Відео тимчасово недоступне</span>
-          </div>
+
+    <div class="card flex-fill text-center" style="min-width: 220px;">
+      <div class="card-body py-2">
+        <h6 class="card-title">Camera</h6>
+        <div class="ratio ratio-16x9 bg-dark text-white d-flex align-items-center justify-content-center rounded" style="min-height: 100px;">
+          <span class="small">Відео тимчасово недоступне</span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">Telemetry</div>
-        <div class="card-body d-flex justify-content-between">
-          <div>Altitude<br><strong>-- m</strong></div>
-          <div>Speed<br><strong>-- km/h</strong></div>
-          <div>Battery<br><strong>-- %</strong></div>
-        </div>
-      </div>
+  <div class="card mt-3">
+    <div class="card-header py-2">Telemetry</div>
+    <div class="card-body py-2 d-flex justify-content-around text-center">
+      <div><div class="small">Altitude</div><strong>-- m</strong></div>
+      <div><div class="small">Speed</div><strong>-- km/h</strong></div>
+      <div><div class="small">Battery</div><strong>-- %</strong></div>
     </div>
   </div>
 
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">WebSocket Status & RC Channels</div>
-        <div class="card-body">
-          <p>Статус: <span id="ws-status" style="color: red;">Відключено</span></p>
-          <p id="status">🎮 Джойстик не підключено</p>
-          <div class="d-flex gap-4 mb-3">
-            <div class="text-center">
-              <div style="width:100px;height:100px;background:#eee;border-radius:8px;position:relative;">
-                <div id="dot-left" style="width:20px;height:20px;background:black;position:absolute;left:40px;top:40px;border-radius:50%;"></div>
-              </div>
-              <div class="mt-2">Throttle / Yaw</div>
-            </div>
-            <div class="text-center">
-              <div style="width:100px;height:100px;background:#eee;border-radius:8px;position:relative;">
-                <div id="dot-right" style="width:20px;height:20px;background:black;position:absolute;left:40px;top:40px;border-radius:50%;"></div>
-              </div>
-              <div class="mt-2">Roll / Pitch</div>
-            </div>
+  <div class="card mt-3">
+    <div class="card-header py-2">WebSocket Status & RC Channels</div>
+    <div class="card-body py-2">
+      <p class="mb-1 small">Статус: <span id="ws-status" style="color: red;">Відключено</span></p>
+      <p class="mb-2 small" id="status">🎮 Джойстик не підключено</p>
+      <div class="d-flex gap-3 justify-content-center mb-3">
+        <div class="text-center">
+          <div style="width:80px;height:80px;background:#eee;border-radius:8px;position:relative;">
+            <div id="dot-left" style="width:14px;height:14px;background:black;position:absolute;left:33px;top:33px;border-radius:50%;"></div>
           </div>
-          <p>Channels CH5 – CH8:</p>
-          <div>
-            <p>CH5: <span id="bar-ch5" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
-            <p>CH6: <span id="bar-ch6" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
-            <p>CH7: <span id="bar-ch7" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
-            <p>CH8: <span id="bar-ch8" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
-          </div>
+          <small>Throttle / Yaw</small>
         </div>
+        <div class="text-center">
+          <div style="width:80px;height:80px;background:#eee;border-radius:8px;position:relative;">
+            <div id="dot-right" style="width:14px;height:14px;background:black;position:absolute;left:33px;top:33px;border-radius:50%;"></div>
+          </div>
+          <small>Roll / Pitch</small>
+        </div>
+      </div>
+      <div class="small">
+        <p>CH5: <span id="bar-ch5" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+        <p>CH6: <span id="bar-ch6" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+        <p>CH7: <span id="bar-ch7" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+        <p>CH8: <span id="bar-ch8" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
       </div>
     </div>
   </div>
