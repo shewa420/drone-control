@@ -1,74 +1,84 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель керування</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <script defer src="/static/js/dashboard.js"></script>
-</head>
-<body>
-  <header>
-    <h1>Drone Control</h1>
-    <nav>
-      <a href="/">Головна</a>
-      <a href="/dashboard" class="active">Панель</a>
-      <a href="/flight-planner">Маршрути</a>
-      <a href="/statistics">Статистика</a>
-      <a href="/settings">Налаштування</a>
-      <a href="/logout" class="danger">Вийти</a>
-    </nav>
-  </header>
 
-  <main>
-    <section class="top-panel">
-      <button class="tab active">Панель керування</button>
+{% extends 'base.html' %}
 
-      <div class="card">
-        <h3>Керування</h3>
-        <button id="startStream" class="btn green">▶️ Старт трансляції</button>
-        <button id="stopStream" class="btn red">⏹️ Стоп трансляції</button>
-      </div>
+{% block content %}
+<div class="container mt-4">
+  <h2>Панель управління дроном</h2>
 
-      <div class="card">
-        <h3>Статус дрона</h3>
-        <p>Неактивний</p>
-      </div>
-
-      <div class="card">
-        <h3>Камера</h3>
-        <iframe width="240" height="135" src="https://www.youtube.com/embed/live_stream?channel=UCqR5GjaqVmQi5LeIvFMi1SQ&autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>
-      </div>
-    </section>
-
-    <section class="telemetry">
-      <h3>Телеметрія</h3>
-      <div class="telemetry-grid">
-        <div><strong>Висота</strong><br>-- м</div>
-        <div><strong>Швидкість</strong><br>-- км/год</div>
-        <div><strong>Акумулятор</strong><br>-- %</div>
-      </div>
-    </section>
-
-    <section class="rc-panel">
-      <h3>WebSocket-з'єднання та RC-канали</h3>
-      <p>Статус: <span id="status-text" class="text-danger">Розірвано</span></p>
-      <div class="sticks">
-        <div>
-          <h4>Throttle / Yaw</h4>
-          <canvas id="dot-left" width="200" height="200" class="stick-canvas"></canvas>
-        </div>
-        <div>
-          <h4>Roll / Pitch</h4>
-          <canvas id="dot-right" width="200" height="200" class="stick-canvas"></canvas>
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Control</h5>
+          <button class="btn btn-success mb-2" disabled>Start Stream</button>
+          <button class="btn btn-danger" disabled>Stop Stream</button>
         </div>
       </div>
-      <p>Канали CH5 – CH8: <span id="ch5-8">--</span></p>
-    </section>
-  </main>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Drone Status</h5>
+          <p class="card-text">Inactive</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Camera</h5>
+          <div class="ratio ratio-16x9 bg-dark text-white d-flex align-items-center justify-content-center rounded">
+            <span>Відео тимчасово недоступне</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <footer>
-    <p>&copy; 2025 Drone Control · Пілот підтримується</p>
-  </footer>
-</body>
-</html>
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">Telemetry</div>
+        <div class="card-body d-flex justify-content-between">
+          <div>Altitude<br><strong>-- m</strong></div>
+          <div>Speed<br><strong>-- km/h</strong></div>
+          <div>Battery<br><strong>-- %</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">WebSocket Status & RC Channels</div>
+        <div class="card-body">
+          <p>Статус: <span id="ws-status" style="color: red;">Відключено</span></p>
+          <p id="status">🎮 Джойстик не підключено</p>
+          <div class="d-flex gap-4 mb-3">
+            <div class="text-center">
+              <div style="width:100px;height:100px;background:#eee;border-radius:8px;position:relative;">
+                <div id="dot-left" style="width:20px;height:20px;background:black;position:absolute;left:40px;top:40px;border-radius:50%;"></div>
+              </div>
+              <div class="mt-2">Throttle / Yaw</div>
+            </div>
+            <div class="text-center">
+              <div style="width:100px;height:100px;background:#eee;border-radius:8px;position:relative;">
+                <div id="dot-right" style="width:20px;height:20px;background:black;position:absolute;left:40px;top:40px;border-radius:50%;"></div>
+              </div>
+              <div class="mt-2">Roll / Pitch</div>
+            </div>
+          </div>
+          <p>Channels CH5 – CH8:</p>
+          <div>
+            <p>CH5: <span id="bar-ch5" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+            <p>CH6: <span id="bar-ch6" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+            <p>CH7: <span id="bar-ch7" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+            <p>CH8: <span id="bar-ch8" class="d-inline-block bg-secondary text-white px-2 rounded" style="min-width:40px;">1000</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
