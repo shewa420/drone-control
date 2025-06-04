@@ -65,3 +65,4 @@ def create_app():
         return {"status": "ok"}
 
     return app
+app = create_app()
