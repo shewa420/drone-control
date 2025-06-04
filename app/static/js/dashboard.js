@@ -41,10 +41,10 @@ function getRCValues(gp) {
     -(gp.axes[2] || 0)
   ];
 
-  const ch1 = scaleAxis(ail);
-  const ch2 = scaleAxis(ele);
+  let ch1 = scaleAxis(ail);
+  let ch2 = scaleAxis(ele);
   let ch3 = scaleAxis(thr);
-  const ch4 = scaleAxis(rud);
+  let ch4 = scaleAxis(rud);
 
   // 🎚 Інверсія тротла
   ch2 = 3000 - ch2;
