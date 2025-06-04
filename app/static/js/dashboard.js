@@ -89,7 +89,6 @@ function updateGamepad() {
     }));
   }
 
-  // 🎛 GUI оновлення
   document.getElementById("dot-left").style.left = `${33 + gp.axes[3] * 20}px`;
   document.getElementById("dot-left").style.top = `${33 - gp.axes[2] * 20}px`;
   document.getElementById("dot-right").style.left = `${33 + gp.axes[0] * 20}px`;
@@ -101,4 +100,22 @@ function updateGamepad() {
   document.getElementById("bar-ch8").textContent = rc[7];
 }
 
-setInterval(updateGamepad, 20);  // 🔁 Частота 50 Гц
+setInterval(updateGamepad, 20);  // 🔁 50 Гц
+
+// === STREAM CONTROL ===
+const btnStart = document.getElementById("start-stream");
+const btnStop = document.getElementById("stop-stream");
+
+btnStart.addEventListener("click", () => {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: "stream", action: "start" }));
+    console.log("▶️ Стрім запущено");
+  }
+});
+
+btnStop.addEventListener("click", () => {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: "stream", action: "stop" }));
+    console.log("⏹ Стрім зупинено");
+  }
+});
